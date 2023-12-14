@@ -39,6 +39,17 @@ namespace MagicVilla_VillaAPI.Controllers
         [HttpPost]
         public ActionResult<VillaDTO> CreateVilla([FromBody]VillaDTO villaDTO)
         {
+            //if (!ModelState.IsValid)
+            //{
+            //    return BadRequest(ModelState);
+            //}
+
+            if (VillaStore.villaList.FirstOrDefault(u => u.Name.ToLower() == villaDTO.Name.ToLower()) != null)
+            {
+                ModelState.AddModelError("CustomError", "Villa already Exists!");
+                return BadRequest(ModelState);
+            }
+
             if (villaDTO == null)
             {
                 return BadRequest(villaDTO);
@@ -54,5 +65,27 @@ namespace MagicVilla_VillaAPI.Controllers
 
             return CreatedAtRoute("GetVilla", new { id = villaDTO.Id },villaDTO);
         }
+
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [HttpDelete("{id:int}", Name = "DeleteVilla")]
+        public IActionResult DeleteVila(int id)
+        {
+            if (id == 0)
+            {
+                return BadRequest();
+            }
+
+            var villa = VillaStore.villaList.FirstOrDefault(u =>u.Id == id);
+
+            if (villa == null)
+            {
+                return NotFound();
+            }
+
+            VillaStore.villaList.Remove(villa);
+            return NoContent();
+        }
     }
-}
+}   
